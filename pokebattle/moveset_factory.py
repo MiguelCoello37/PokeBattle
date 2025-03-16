@@ -4,9 +4,10 @@ from pokebattle.moveset_data import MovesetData
 
 def create_moveset(data: list[dict]):
     version = "emerald"
+    learn_methods = ["level-up", "machine", "tutor"]
     moves_data_by_learn_method = {
         learn_method: get_moves_data_by_learn_method(data, learn_method, version=version)
-        for learn_method in ["level-up", "machine", "tutor"]
+        for learn_method in learn_methods
     }
 
     moves = {

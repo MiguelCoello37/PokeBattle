@@ -1,5 +1,9 @@
 import requests
 
+from pb_pokeapi.pokeapi_move_factory import create_pokeapi_move
+from pb_pokeapi.pokeapi_move_non_detail_factory import create_pokeapi_move_non_detail
+from pb_pokeapi.pokeapi_move_non_detail import PokeApiMoveNonDetail
+
 
 class PokeAPI:
     def __init__(self):
@@ -13,38 +17,44 @@ class PokeAPI:
 
         return response.json()
 
-    def get_pokemon_moves_in_spanish(self, name):
+    def get_pokemon_moves_in_language(self, name, language="es"):
         pokemon = self.get_pokemon_by_name(name)
         if not pokemon:
             return None
 
-        moves_in_spanish = [
-            self.get_move_in_spanish(move)
+        moves_in_language = self._get_pokemon_moves_in_language(pokemon, language)
+
+        return moves_in_language
+
+    def _get_pokemon_moves_in_language(self, pokemon, language="es"):
+        return [
+            self.get_move_in_language(move, language)
             for move in pokemon["moves"]
         ]
 
-        return moves_in_spanish
+    def get_move_in_language(self, move_data: dict, language: str):
+        move = create_pokeapi_move_non_detail(move_data)
+        move_info = self.get_move_info(move)
+        move_info_in_language = self._get_move_info_in_language(move_info, language)
+        pokeapi_move = create_pokeapi_move(move_info_in_language)
 
-    def get_move_in_spanish(self, move):
-        move_response = requests.get(move["move"]["url"])
+        return pokeapi_move
+
+    def get_move_info(self, move_non_detail: PokeApiMoveNonDetail):
+        move_response = requests.get(move_non_detail.url)
         if move_response.status_code != 200:
             return None
 
-        move_info = move_response.json()
+        return move_response.json()
 
-        move_info_spanish = [
+    def _get_move_info_in_language(self, move_info, language):
+        move_info_language = next((
             language_info
             for language_info in move_info["names"]
-            if language_info["language"]["name"] == "es"
-        ][0]
-        if not move_info_spanish:
-            return None
-        
-        move_name_spanish = move_info_spanish.get("name", None)
-        if not move_name_spanish:
-            print(move_info_spanish)
+            if language_info["language"]["name"] == language
+        ), None)
 
-        return move_name_spanish
+        return move_info_language
 
     def get_type_in_spanish(self, type: dict):
         type_response = requests.get(type["type"]["url"])
