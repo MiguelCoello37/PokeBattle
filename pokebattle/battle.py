@@ -8,7 +8,8 @@ def start():
     language = "es"
     pokeapi = PokeAPI()
     pokemon_moves = pokeapi.get_pokemon_moves_in_language(pokemon_name, language)
-    print(pokemon_moves)
+    pokemon_moves_json = {"data": pokemon_moves}
+    print(pokemon_moves_json)
 
     # pokemon = create_pokemon(pokemon_name, pokeapi)
     # print(pokemon)

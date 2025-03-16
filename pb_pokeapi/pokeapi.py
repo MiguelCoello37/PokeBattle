@@ -34,13 +34,13 @@ class PokeAPI:
 
     def get_move_in_language(self, move_data: dict, language: str):
         move = create_pokeapi_move_non_detail(move_data)
-        move_info = self.get_move_info(move)
+        move_info = self._get_move_info(move)
         move_info_in_language = self._get_move_info_in_language(move_info, language)
         pokeapi_move = create_pokeapi_move(move_info_in_language)
 
         return pokeapi_move
 
-    def get_move_info(self, move_non_detail: PokeApiMoveNonDetail):
+    def _get_move_info(self, move_non_detail: PokeApiMoveNonDetail):
         move_response = requests.get(move_non_detail.url)
         if move_response.status_code != 200:
             return None
@@ -48,13 +48,15 @@ class PokeAPI:
         return move_response.json()
 
     def _get_move_info_in_language(self, move_info, language):
-        move_info_language = next((
-            language_info
+        move_name_in_language = next((
+            language_info["name"]
             for language_info in move_info["names"]
             if language_info["language"]["name"] == language
         ), None)
 
-        return move_info_language
+        move_info["name"] = move_name_in_language
+
+        return move_info
 
     def get_type_in_spanish(self, type: dict):
         type_response = requests.get(type["type"]["url"])
